@@ -3,225 +3,320 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mon site</title>
+  <title>Telegram Style UI</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
+    :root{
+      --bg: #e7ebf0;
+      --panel: #ffffff;
+      --panel-2: #f3f5f7;
+      --text: #111827;
+      --muted: #7a8696;
+      --blue: #2aabee;
+      --green: #dff6d7;
+      --shadow: 0 10px 24px rgba(0,0,0,.10);
+      --radius: 18px;
     }
 
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,.55), transparent 30%),
+        linear-gradient(180deg, #edf2f7 0%, #e6edf4 100%);
+      color: var(--text);
+    }
+
+    .app {
+      max-width: 760px;
       min-height: 100vh;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      background: rgba(255,255,255,.18);
+    }
+
+    .header {
+      padding: 14px 14px 10px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .menu-pill {
+      background: #e7f5dc;
+      color: #111;
+      padding: 10px 14px;
+      border-radius: 20px;
+      font-size: 18px;
+      box-shadow: var(--shadow);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .menu-pill small {
+      font-size: 12px;
+      color: #60725c;
+      display: block;
+      line-height: 1;
+    }
+
+    .menu-pill strong {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .balance-wrap {
+      padding: 6px 14px 10px;
+    }
+
+    .balance {
+      display: inline-block;
+      background: var(--panel);
+      border-radius: 18px;
+      padding: 14px 18px;
+      font-size: 22px;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+      line-height: 1.2;
+    }
+
+    .balance .coins { font-weight: 700; }
+    .balance .money { font-weight: 700; }
+
+    .chat-area {
+      flex: 1;
+      padding: 10px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .composer-top {
+      background: var(--panel);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 12px 14px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #ff512f, #dd2476, #7f00ff);
-      padding: 20px;
-      color: white;
+      gap: 12px;
     }
 
-    .container {
-      width: 100%;
-      max-width: 420px;
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    .icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--panel-2);
+      display: grid;
+      place-items: center;
+      color: #6b7280;
+      font-size: 18px;
+      flex: 0 0 auto;
     }
 
-    .title {
-      text-align: center;
-      margin-bottom: 18px;
-    }
-
-    .title h1 {
-      font-size: 30px;
-      margin-bottom: 8px;
-    }
-
-    .title p {
-      font-size: 14px;
-      opacity: 0.9;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin: 18px 0 22px;
-    }
-
-    .tabs button {
+    .placeholder {
       flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
+      color: #9aa3ad;
+      font-size: 18px;
+      padding-left: 4px;
+    }
+
+    .history {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 2px 2px 0;
+    }
+
+    .bubble {
+      max-width: 88%;
+      padding: 12px 14px;
+      border-radius: 18px;
+      box-shadow: var(--shadow);
       font-size: 15px;
-      font-weight: bold;
-      transition: 0.3s;
+      line-height: 1.35;
+      word-break: break-word;
     }
 
-    .tabs button.active {
-      background: white;
-      color: #7f00ff;
+    .bubble.bot {
+      align-self: flex-start;
+      background: var(--panel);
+      border-top-left-radius: 8px;
     }
 
-    .tabs button.inactive {
-      background: rgba(255, 255, 255, 0.18);
-      color: white;
+    .bubble.user {
+      align-self: flex-end;
+      background: #dcf8c6;
+      border-top-right-radius: 8px;
     }
 
-    .form {
-      display: none;
-      animation: fadeIn 0.3s ease;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 2px;
     }
 
-    .form.active {
-      display: block;
-    }
-
-    .field {
-      margin-bottom: 14px;
-    }
-
-    .field label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 14px;
-      font-weight: bold;
-    }
-
-    .field input {
-      width: 100%;
-      padding: 13px 14px;
+    .btn {
       border: none;
       border-radius: 12px;
-      outline: none;
-      font-size: 15px;
-      background: rgba(255, 255, 255, 0.92);
-      color: #222;
-    }
-
-    .field input:focus {
-      border: 2px solid #ffd700;
-    }
-
-    .submit-btn {
-      width: 100%;
-      padding: 13px;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: bold;
+      background: var(--panel-2);
+      color: #111;
+      min-height: 68px;
+      padding: 10px 12px;
+      font-size: 17px;
+      font-weight: 500;
+      box-shadow: 0 2px 0 rgba(0,0,0,.04);
       cursor: pointer;
-      margin-top: 8px;
-      background: linear-gradient(90deg, #00c6ff, #0072ff);
-      color: white;
-      transition: transform 0.2s;
-    }
-
-    .submit-btn:hover {
-      transform: scale(1.02);
-    }
-
-    .small-text {
+      transition: transform .15s ease, filter .15s ease;
       text-align: center;
-      margin-top: 16px;
-      font-size: 13px;
-      opacity: 0.95;
     }
 
-    .small-text span {
-      color: #ffe66d;
-      font-weight: bold;
+    .btn:hover { transform: translateY(-1px); filter: brightness(.98); }
+    .btn:active { transform: translateY(1px); }
+
+    .bottom {
+      padding: 10px 12px 16px;
+      background: rgba(255,255,255,.45);
+      backdrop-filter: blur(6px);
+    }
+
+    .input-bar {
+      background: var(--panel);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .input-bar input {
+      border: none;
+      outline: none;
+      flex: 1;
+      background: transparent;
+      font-size: 16px;
+      color: var(--text);
+      min-width: 0;
+    }
+
+    .send {
+      width: 42px;
+      height: 42px;
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2aabee, #6f7dff);
+      color: white;
+      font-size: 18px;
       cursor: pointer;
+      flex: 0 0 auto;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    @media (max-width: 520px) {
+      .balance { font-size: 18px; }
+      .btn { min-height: 62px; font-size: 15px; }
+      .placeholder { font-size: 16px; }
+      .menu-pill strong { font-size: 16px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="title">
-      <h1>Bienvenue</h1>
-      <p>Connecte-toi ou crée un compte</p>
+  <div class="app">
+    <div class="header">
+      <div class="menu-pill" onclick="botReply('Menu ouvert')">
+        <small>⬅ BACK</small>
+        <strong>Menu</strong>
+      </div>
     </div>
 
-    <div class="tabs">
-      <button id="loginTab" class="active" onclick="showLogin()">Sign in</button>
-      <button id="registerTab" class="inactive" onclick="showRegister()">Sign up</button>
+    <div class="balance-wrap">
+      <div class="balance">
+        Balance: <span class="coins">911.00 COINS</span> <span>$</span> <span class="money">22Ar</span>
+      </div>
     </div>
 
-    <div id="loginForm" class="form active">
-      <div class="field">
-        <label for="loginEmail">Email</label>
-        <input type="email" id="loginEmail" placeholder="ton@email.com" />
+    <div class="chat-area">
+      <div class="composer-top">
+        <div class="icon">☺</div>
+        <div class="placeholder">Message</div>
+        <div class="icon">⌄</div>
+        <div class="icon">📷</div>
+        <div class="icon">📎</div>
+        <div class="icon">◯</div>
       </div>
-      <div class="field">
-        <label for="loginPassword">Mot de passe</label>
-        <input type="password" id="loginPassword" placeholder="********" />
+
+      <div class="history" id="history">
+        <div class="bubble bot">Bienvenue. Tape un message ou choisis un bouton.</div>
+        <div class="bubble user">Menu</div>
       </div>
-      <button class="submit-btn" onclick="loginUser()">Login</button>
+
+      <div class="grid">
+        <button class="btn" onclick="quick('TASK')">TASK</button>
+        <button class="btn" onclick="quick('SHARE')">SHARE</button>
+        <button class="btn" onclick="quick('GET FOLLOWER')">GET FOLLOWER</button>
+        <button class="btn" onclick="quick('GET SHARE')">GET SHARE</button>
+        <button class="btn" onclick="quick('GET LIKE')">GET LIKE</button>
+        <button class="btn" onclick="quick('GET COMMENT')">GET COMMENT</button>
+        <button class="btn" onclick="quick('Withdraw/Deposit')">💸 Withdraw/Deposit</button>
+        <button class="btn" onclick="quick('SWAP')">SWAP 🌀</button>
+        <button class="btn" onclick="quick('VIP TASK')">⚡ VIP TASK</button>
+        <button class="btn" onclick="quick('Referral/Support')">🔗 Referral/Support</button>
+        <button class="btn" onclick="quick('Stat Order')">📊 Stat Order</button>
+        <button class="btn" onclick="quick('Back Menu')">⬅ BACK Menu</button>
+      </div>
     </div>
 
-    <div id="registerForm" class="form">
-      <div class="field">
-        <label for="name">Nom complet</label>
-        <input type="text" id="name" placeholder="Ton nom" />
+    <div class="bottom">
+      <div class="input-bar">
+        <input id="msgInput" type="text" placeholder="Écrire un message..." />
+        <button class="send" onclick="sendMessage()">➤</button>
       </div>
-      <div class="field">
-        <label for="email">Email</label>
-        <input type="email" id="email" placeholder="ton@email.com" />
-      </div>
-      <div class="field">
-        <label for="password">Mot de passe</label>
-        <input type="password" id="password" placeholder="Créer un mot de passe" />
-      </div>
-      <button class="submit-btn" onclick="registerUser()">Register</button>
-    </div>
-
-    <div class="small-text">
-      Crée ton compte gratuitement, puis connecte-toi.
+      <div class="hint">Style Telegram avec champ d’écriture en bas.</div>
     </div>
   </div>
 
   <script>
-    function showLogin() {
-      document.getElementById("loginForm").classList.add("active");
-      document.getElementById("registerForm").classList.remove("active");
+    const historyEl = document.getElementById('history');
+    const inputEl = document.getElementById('msgInput');
 
-      document.getElementById("loginTab").classList.add("active");
-      document.getElementById("loginTab").classList.remove("inactive");
-
-      document.getElementById("registerTab").classList.remove("active");
-      document.getElementById("registerTab").classList.add("inactive");
+    function addBubble(text, type) {
+      const el = document.createElement('div');
+      el.className = `bubble ${type}`;
+      el.textContent = text;
+      historyEl.appendChild(el);
+      historyEl.scrollTop = historyEl.scrollHeight;
     }
 
-    function showRegister() {
-      document.getElementById("registerForm").classList.add("active");
-      document.getElementById("loginForm").classList.remove("active");
-
-      document.getElementById("registerTab").classList.add("active");
-      document.getElementById("registerTab").classList.remove("inactive");
-
-      document.getElementById("loginTab").classList.remove("active");
-      document.getElementById("loginTab").classList.add("inactive");
+    function botReply(text) {
+      addBubble(text, 'bot');
     }
 
-    function loginUser() {
-      alert("Login cliqué");
+    function quick(text) {
+      addBubble(text, 'user');
+      addBubble(`Action reçue : ${text}`, 'bot');
     }
 
-    function registerUser() {
-      alert("Register cliqué");
+    function sendMessage() {
+      const text = inputEl.value.trim();
+      if (!text) return;
+      addBubble(text, 'user');
+      addBubble(`Tu as écrit : ${text}`, 'bot');
+      inputEl.value = '';
+      inputEl.focus();
     }
+
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
   </script>
 </body>
-            </html>
+                                          </html>
