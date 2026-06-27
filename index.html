@@ -3,330 +3,89 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FB Tasks Panel</title>
+  <title>Tasker Web</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+    body{
+      min-height:100vh;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,#ff512f,#dd2476,#7f00ff);
+      padding:20px;color:white;
+    }
+    .container{
+      width:100%;max-width:520px;background:rgba(255,255,255,.12);
+      backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.2);
+      border-radius:24px;padding:22px;box-shadow:0 20px 40px rgba(0,0,0,.25);
+    }
+    .page{display:none;animation:fadeIn .25s ease}
+    .page.active{display:block}
+    .title{text-align:center;margin-bottom:14px}
+    .title h1{font-size:28px;margin-bottom:6px}
+    .title p{font-size:13px;opacity:.92}
+
+    .row{display:flex;gap:10px;align-items:center}
+    .spaced{justify-content:space-between}
+    .badge{
+      background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.16);
+      padding:10px 12px;border-radius:14px;font-size:13px;
     }
 
-    body {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #ff512f, #dd2476, #7f00ff);
-      padding: 20px;
-      color: white;
+    .tabs{display:flex;gap:10px;margin:14px 0 18px}
+    .tabs button,.btn,.btn2{
+      border:none;border-radius:14px;cursor:pointer;font-size:15px;font-weight:bold;transition:.2s;
     }
+    .tabs button{flex:1;padding:12px}
+    .tabs button.active{background:#fff;color:#7f00ff}
+    .tabs button.inactive{background:rgba(255,255,255,.18);color:white}
 
-    .container {
-      width: 100%;
-      max-width: 520px;
-      background: rgba(0, 0, 0, 0.35);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 24px;
-      padding: 18px 18px 22px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
-      position: relative;
+    .field{margin-bottom:12px}
+    .field label{display:block;margin-bottom:6px;font-size:13px;font-weight:bold}
+    .field input,.field textarea,.field select{
+      width:100%;padding:12px 12px;border:none;border-radius:12px;outline:none;
+      font-size:14px;background:rgba(255,255,255,.92);color:#222;
     }
+    .field textarea{height:110px;resize:vertical}
 
-    .page {
-      display: none;
-      animation: fadeIn 0.25s ease;
+    .btn{width:100%;padding:13px;background:linear-gradient(90deg,#00c6ff,#0072ff);color:#fff}
+    .btn:hover,.btn2:hover{transform:scale(1.01)}
+    .btn2{padding:12px 14px;background:rgba(255,255,255,.16);color:white;flex:1}
+
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .grid button{padding:12px}
+
+    .message{margin-top:12px;min-height:22px;font-size:14px}
+    .success{color:#b7ffb7;font-weight:bold}
+    .error{color:#ffd1d1;font-weight:bold}
+
+    .card{
+      margin-top:12px;padding:14px;background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.16);border-radius:18px;
     }
-
-    .page.active {
-      display: block;
+    .card h2{font-size:18px;margin-bottom:8px}
+    .list{display:grid;gap:10px;margin-top:10px}
+    .item{
+      background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.16);
+      border-radius:14px;padding:12px;
     }
+    .item .small{font-size:12px;opacity:.9}
+    .link{color:#fff;text-decoration:underline}
 
-    .title {
-      text-align: center;
-      margin-bottom: 18px;
+    .loader{
+      display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.35);
+      border-top-color:white;border-radius:50%;animation:spin .8s linear infinite;
+      vertical-align:middle;margin-right:8px;
     }
-
-    .title h1 {
-      font-size: 26px;
-      margin-bottom: 4px;
-    }
-
-    .title p {
-      font-size: 14px;
-      opacity: 0.9;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin: 10px 0 16px;
-    }
-
-    .tabs button, .submit-btn, .secondary-btn, .feature-btn, .small-btn {
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-      transition: 0.25s;
-    }
-
-    .tabs button {
-      flex: 1;
-      padding: 11px;
-    }
-
-    .tabs button.active {
-      background: white;
-      color: #7f00ff;
-    }
-
-    .tabs button.inactive {
-      background: rgba(255, 255, 255, 0.18);
-      color: white;
-    }
-
-    .form {
-      display: none;
-      animation: fadeIn 0.25s ease;
-    }
-
-    .form.active {
-      display: block;
-    }
-
-    .field {
-      margin-bottom: 10px;
-    }
-
-    .field label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 13px;
-      font-weight: bold;
-    }
-
-    .field input, .field textarea, .field select {
-      width: 100%;
-      padding: 11px 12px;
-      border: none;
-      border-radius: 12px;
-      outline: none;
-      font-size: 14px;
-      background: rgba(255, 255, 255, 0.92);
-      color: #222;
-    }
-
-    .field textarea {
-      resize: vertical;
-      min-height: 70px;
-    }
-
-    .field input:focus, .field textarea:focus, .field select:focus {
-      border: 2px solid #ffd700;
-    }
-
-    .submit-btn {
-      width: 100%;
-      padding: 11px;
-      margin-top: 8px;
-      background: linear-gradient(90deg, #00c6ff, #0072ff);
-      color: white;
-    }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .feature-btn {
-      padding: 11px;
-      background: rgba(255,255,255,0.14);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.22);
-    }
-
-    .feature-btn.disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    .submit-btn:hover, .secondary-btn:hover, .feature-btn:hover, .small-btn:hover {
-      transform: scale(1.03);
-    }
-
-    .secondary-btn {
-      padding: 10px 12px;
-      background: rgba(255, 255, 255, 0.16);
-      color: white;
-    }
-
-    .small-btn {
-      padding: 6px 10px;
-      font-size: 12px;
-      background: rgba(255,255,255,0.14);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 10px;
-    }
-
-    .small-text {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 13px;
-      opacity: 0.95;
-    }
-
-    .message {
-      text-align: center;
-      margin-top: 10px;
-      min-height: 22px;
-      font-size: 13px;
-    }
-
-    .success { color: #b7ffb7; font-weight: bold; }
-    .error { color: #ffd1d1; font-weight: bold; }
-
-    .card {
-      margin-top: 8px;
-      padding: 10px 12px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 16px;
-    }
-
-    .card h2 {
-      font-size: 17px;
-      margin-bottom: 4px;
-    }
-
-    .card p {
-      font-size: 13px;
-      line-height: 1.5;
-      opacity: 0.95;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .balance {
-      font-size: 13px;
-      opacity: 0.95;
-    }
-
-    .balance strong {
-      font-size: 15px;
-    }
-
-    .hamburger {
-      width: 28px;
-      height: 24px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .hamburger span {
-      height: 3px;
-      border-radius: 999px;
-      background: white;
-    }
-
-    .admin-menu {
-      position: absolute;
-      top: 40px;
-      right: 18px;
-      background: rgba(0,0,0,0.85);
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.25);
-      padding: 8px;
-      display: none;
-      flex-direction: column;
-      gap: 6px;
-      z-index: 10;
-    }
-
-    .admin-menu.show {
-      display: flex;
-    }
-
-    .section-title {
-      font-size: 14px;
-      margin-top: 12px;
-      margin-bottom: 4px;
-      font-weight: bold;
-    }
-
-    .section-area {
-      margin-top: 4px;
-    }
-
-    .accounts-list, .tasks-log {
-      margin-top: 6px;
-      max-height: 160px;
-      overflow-y: auto;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.03);
-      padding: 6px;
-      font-size: 13px;
-    }
-
-    .account-item, .task-item {
-      padding: 6px;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.08);
-      margin-bottom: 4px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .loader {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255,255,255,0.35);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      vertical-align: middle;
-      margin-right: 8px;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Admin menu -->
-    <div id="adminMenu" class="admin-menu">
-      <button class="small-btn" onclick="showAccountInfo()">Infos compte</button>
-      <button class="small-btn" onclick="showAdminCredit()">Créditer Coins/Ar</button>
-      <button class="small-btn" onclick="logoutUser()">Déconnexion</button>
-    </div>
 
-    <!-- Auth Page -->
+    <!-- AUTH -->
     <div id="authPage" class="page active">
       <div class="title">
-        <h1>FB Tasks</h1>
-        <p>Connecte-toi ou crée un compte</p>
+        <h1>Tasker</h1>
+        <p>Connexion / Inscription</p>
       </div>
 
       <div class="tabs">
@@ -336,783 +95,679 @@
 
       <div id="loginForm" class="form active">
         <div class="field">
-          <label for="loginEmail">Email</label>
-          <input type="email" id="loginEmail" placeholder="ton@email.com" />
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="ton@email.com">
         </div>
         <div class="field">
-          <label for="loginPassword">Mot de passe</label>
-          <input type="password" id="loginPassword" placeholder="********" />
+          <label>Mot de passe</label>
+          <input type="password" id="loginPassword" placeholder="********">
         </div>
-        <button class="submit-btn" onclick="loginUser()">Login</button>
+        <button class="btn" onclick="loginUser()">Login</button>
       </div>
 
       <div id="registerForm" class="form">
         <div class="field">
-          <label for="registerEmail">Email</label>
-          <input type="email" id="registerEmail" placeholder="ton@email.com" />
+          <label>Email</label>
+          <input type="email" id="registerEmail" placeholder="ton@email.com">
         </div>
         <div class="field">
-          <label for="registerPassword">Mot de passe</label>
-          <input type="password" id="registerPassword" placeholder="Créer un mot de passe" />
+          <label>Mot de passe</label>
+          <input type="password" id="registerPassword" placeholder="Créer un mot de passe">
         </div>
-        <button class="submit-btn" onclick="registerUser()">Register</button>
+        <button class="btn" onclick="registerUser()">Register</button>
       </div>
 
       <div id="authMessage" class="message"></div>
-
-      <div class="small-text">
-        Crée ton compte gratuitement, puis connecte-toi.
-      </div>
     </div>
 
-    <!-- Dashboard Page -->
-    <div id="dashboardPage" class="page">
-      <div class="top-bar">
-        <div>
-          <div class="balance">
-            <div><strong>Balance:</strong> <span id="balanceCoins">0</span> Coins • <span id="balanceAr">0</span> Ar</div>
-            <div id="userEmailLabel" style="font-size:12px; opacity:0.9;"></div>
-          </div>
-        </div>
-        <div id="hamburgerWrap" style="display:none;">
-          <div class="hamburger" onclick="toggleAdminMenu()">
-            <span></span><span></span><span></span>
-          </div>
+    <!-- DASHBOARD -->
+    <div id="dashPage" class="page">
+      <div class="row spaced">
+        <div class="badge" id="balanceBadge">Balance: ...</div>
+        <div class="row" style="gap:8px;">
+          <button class="btn2" id="adminBtn" style="display:none" onclick="openAdmin()">☰</button>
+          <button class="btn2" onclick="logoutUser()">Logout</button>
         </div>
       </div>
 
       <div class="card">
         <h2>Actions</h2>
-        <div class="feature-grid">
-          <button id="btnAddAccount" class="feature-btn" onclick="showSection('addAccount')">Add Account</button>
-          <button id="btnWork" class="feature-btn" onclick="showSection('work')">Work Tasks</button>
-          <button id="btnGetFollower" class="feature-btn" onclick="showSection('getFollower')">GET FOLLOWER</button>
-          <button id="btnGetLike" class="feature-btn" onclick="showSection('getLike')">GET LIKE</button>
-          <button id="btnGetComment" class="feature-btn" onclick="showSection('getComment')">GET COMMENT</button>
-          <button class="feature-btn" onclick="showSection('deposit')">Deposit</button>
-          <button class="feature-btn" onclick="showSection('withdraw')">Withdraw</button>
-          <button class="feature-btn" onclick="showSection('swap')">SWAP</button>
+        <div class="grid">
+          <button class="btn2" onclick="openAddAccount()">Add account</button>
+          <button class="btn2" onclick="openTask()">Task</button>
+          <button class="btn2" id="btnGetFollower" onclick="openOrder('follow')">Get follower</button>
+          <button class="btn2" id="btnGetLike" onclick="openOrder('like')">Get like</button>
+          <button class="btn2" id="btnGetComment" onclick="openOrder('comment')">Get comment</button>
+          <button class="btn2" onclick="openDeposit()">Deposit</button>
+          <button class="btn2" onclick="openWithdraw()">Withdraw</button>
+          <button class="btn2" onclick="openSwap()">Swap</button>
         </div>
+        <div id="dashMessage" class="message"></div>
       </div>
-
-      <!-- Dynamic sections -->
-      <div id="sectionsArea" class="section-area">
-        <!-- Add account -->
-        <div id="sectionAddAccount" class="card" style="display:none;">
-          <h2>Add Task Account</h2>
-          <p style="font-size:12px;opacity:0.9;">Entrez l'URL du profil Facebook et les cookies du compte, puis cliquez sur Check.</p>
-          <div class="field">
-            <label>URL du profil Facebook</label>
-            <input type="text" id="accProfileLink" placeholder="https://www.facebook.com/profile.php?id=..." />
-          </div>
-          <div class="field">
-            <label>Cookies (format: nom1=val1; nom2=val2; ...)</label>
-            <textarea id="accCookies" placeholder="c_user=...; xs=...; datr=...;"></textarea>
-          </div>
-          <button class="submit-btn" onclick="addTaskAccount()">Check & Save</button>
-          <div id="addAccountMessage" class="message"></div>
-        </div>
-
-        <!-- Work tasks -->
-        <div id="sectionWork" class="card" style="display:none;">
-          <h2>Work Tasks</h2>
-          <p style="font-size:12px;opacity:0.9;">Choisissez un compte, puis vérifiez des tâches (Follow / Like / Comment).</p>
-          <button class="small-btn" onclick="loadAccountsForWork()">Charger comptes</button>
-          <div id="accountsForWork" class="accounts-list"></div>
-
-          <div id="currentTaskArea" style="margin-top:8px; display:none;">
-            <div class="section-title">Tâche actuelle</div>
-            <div id="currentTaskInfo" style="font-size:13px;"></div>
-            <div style="display:flex;gap:8px;margin-top:6px;">
-              <button class="secondary-btn" style="flex:1;" onclick="verifyCurrentTask()">VERIFY</button>
-              <button class="secondary-btn" style="flex:1;" onclick="skipTask()">SKIP</button>
-            </div>
-            <div id="workerMessage" class="message"></div>
-          </div>
-        </div>
-
-        <!-- GET FOLLOWER -->
-        <div id="sectionGetFollower" class="card" style="display:none;">
-          <h2>GET FOLLOWER</h2>
-          <p style="font-size:12px;opacity:0.9;">1 coin par follower. Coins minimum requis: 20.</p>
-          <div class="field">
-            <label>Lien de profil Facebook</label>
-            <input type="text" id="gfProfileLink" placeholder="https://www.facebook.com/nom..." />
-          </div>
-          <div class="field">
-            <label>Nombre de followers</label>
-            <input type="number" id="gfTarget" placeholder="ex: 50" />
-          </div>
-          <button class="submit-btn" onclick="createFollowOrder()">Add FOLLOW Order</button>
-          <div id="gfMessage" class="message"></div>
-        </div>
-
-        <!-- GET LIKE -->
-        <div id="sectionGetLike" class="card" style="display:none;">
-          <h2>GET LIKE</h2>
-          <p style="font-size:12px;opacity:0.9;">0.5 coin par like. Coins minimum requis: 20.</p>
-          <div class="field">
-            <label>Lien du post/reel</label>
-            <input type="text" id="glLink" placeholder="https://www.facebook.com/..." />
-          </div>
-          <div class="field">
-            <label>Réaction</label>
-            <select id="glReaction">
-              <option value="like">J'aime</option>
-              <option value="love">J'adore</option>
-              <option value="haha">Haha</option>
-              <option value="wow">Wouah</option>
-              <option value="care">Solidaire</option>
-              <option value="angry">En colère</option>
-              <option value="sad">Triste</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Nombre de likes</label>
-            <input type="number" id="glTarget" placeholder="ex: 50" />
-          </div>
-          <button class="submit-btn" onclick="createLikeOrder()">Add LIKE Order</button>
-          <div id="glMessage" class="message"></div>
-        </div>
-
-        <!-- GET COMMENT -->
-        <div id="sectionGetComment" class="card" style="display:none;">
-          <h2>GET COMMENT</h2>
-          <p style="font-size:12px;opacity:0.9;">2 coins par commentaire. Coins minimum requis: 20.</p>
-          <div class="field">
-            <label>Lien du post</label>
-            <input type="text" id="gcLink" placeholder="https://www.facebook.com/..." />
-          </div>
-          <div class="field">
-            <label>Texte exact du commentaire</label>
-            <input type="text" id="gcText" placeholder="ex: Merci chef" />
-          </div>
-          <div class="field">
-            <label>Nombre de commentaires</label>
-            <input type="number" id="gcTarget" placeholder="ex: 10" />
-          </div>
-          <button class="submit-btn" onclick="createCommentOrder()">Add COMMENT Order</button>
-          <div id="gcMessage" class="message"></div>
-        </div>
-
-        <!-- Deposit -->
-        <div id="sectionDeposit" class="card" style="display:none;">
-          <h2>Deposit</h2>
-          <p style="font-size:12px;opacity:0.9;">Crée une demande de dépôt. L'admin la validera et créditera les Coins.</p>
-          <div class="field">
-            <label>Coins à acheter</label>
-            <input type="number" id="depCoins" placeholder="ex: 1000" />
-          </div>
-          <div class="field">
-            <label>Référence paiement (OM/banque)</label>
-            <input type="text" id="depRef" placeholder="REF-TRANSACTION" />
-          </div>
-          <button class="submit-btn" onclick="createDeposit()">Envoyer demande</button>
-          <div id="depMessage" class="message"></div>
-        </div>
-
-        <!-- Withdraw -->
-        <div id="sectionWithdraw" class="card" style="display:none;">
-          <h2>Withdraw</h2>
-          <p style="font-size:12px;opacity:0.9;">Demande de retrait (min 5000 Ar).</p>
-          <div class="field">
-            <label>Montant (Ar)</label>
-            <input type="number" id="wdAmount" placeholder="ex: 5000" />
-          </div>
-          <div class="field">
-            <label>Méthode</label>
-            <select id="wdMethod">
-              <option value="om">Orange Money</option>
-              <option value="bank">Bank</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Compte (numéro / RIB)</label>
-            <input type="text" id="wdAccount" placeholder="+261..." />
-          </div>
-          <div class="field">
-            <label>Nom du destinataire</label>
-            <input type="text" id="wdName" placeholder="Nom complet" />
-          </div>
-          <button class="submit-btn" onclick="createWithdraw()">Envoyer demande</button>
-          <div id="wdMessage" class="message"></div>
-        </div>
-
-        <!-- SWAP -->
-        <div id="sectionSwap" class="card" style="display:none;">
-          <h2>SWAP</h2>
-          <p style="font-size:12px;opacity:0.9;">Échange Ar → Coins (1 COIN = 1.5 Ar).</p>
-          <div class="field">
-            <label>Montant en Ar à swap</label>
-            <input type="number" id="swapAmount" placeholder="ex: 1500" />
-          </div>
-          <button class="submit-btn" onclick="doSwap()">SWAP</button>
-          <div id="swapMessage" class="message"></div>
-        </div>
-
-        <!-- Admin Credit -->
-        <div id="sectionAdminCredit" class="card" style="display:none;">
-          <h2>Admin: Créditer Coins/Ar</h2>
-          <p style="font-size:12px;opacity:0.9;">Crédite manuellement un utilisateur (Coins/Ar).</p>
-          <div class="field">
-            <label>Email de l'utilisateur</label>
-            <input type="email" id="admEmail" placeholder="user@example.com" />
-          </div>
-          <div class="field">
-            <label>Coins</label>
-            <input type="number" id="admCoins" placeholder="ex: 100" />
-          </div>
-          <div class="field">
-            <label>Ar</label>
-            <input type="number" id="admAr" placeholder="ex: 500" />
-          </div>
-          <button class="submit-btn" onclick="adminCredit()">Créditer</button>
-          <div id="admMessage" class="message"></div>
-        </div>
-
-      </div>
-
-      <div id="dashboardMessage" class="message"></div>
     </div>
+
+    <!-- ADD ACCOUNT -->
+    <div id="addAccountPage" class="page">
+      <div class="title">
+        <h1>Add account</h1>
+        <p>URL profil + cookies</p>
+      </div>
+      <div class="field">
+        <label>Profile URL</label>
+        <input id="accProfileUrl" placeholder="https://www.facebook.com/username">
+      </div>
+      <div class="field">
+        <label>Cookies</label>
+        <textarea id="accCookies" placeholder="c_user=...; xs=...; ..."></textarea>
+      </div>
+      <div class="row">
+        <button class="btn2" onclick="goBackDash()">Back</button>
+        <button class="btn2" onclick="checkAccount()">Check</button>
+      </div>
+      <div id="addAccMsg" class="message"></div>
+    </div>
+
+    <!-- TASK: select account -->
+    <div id="taskAccountsPage" class="page">
+      <div class="title">
+        <h1>Task</h1>
+        <p>Choisir un compte</p>
+      </div>
+      <div id="accountsList" class="list"></div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn2" onclick="goBackDash()">Back</button>
+        <button class="btn2" onclick="loadAccounts()">Refresh</button>
+      </div>
+      <div id="taskAccMsg" class="message"></div>
+    </div>
+
+    <!-- TASK: run -->
+    <div id="taskRunPage" class="page">
+      <div class="title">
+        <h1 id="taskTypeTitle">Task</h1>
+        <p id="taskAccountTitle"></p>
+      </div>
+
+      <div class="card">
+        <div><b>Link:</b> <a class="link" id="taskLink" href="#" target="_blank">Open</a></div>
+        <div id="taskExtra" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn2" onclick="skipTask()">Skip</button>
+        <button class="btn2" onclick="verifyTask()">Verify</button>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn2" onclick="openTask()">Change account</button>
+        <button class="btn2" onclick="goBackDash()">Back</button>
+      </div>
+      <div id="taskRunMsg" class="message"></div>
+    </div>
+
+    <!-- ORDER pages -->
+    <div id="orderPage" class="page">
+      <div class="title">
+        <h1 id="orderTitle">Create order</h1>
+        <p>Ajout dans la liste des tâches</p>
+      </div>
+
+      <div class="field">
+        <label>Link</label>
+        <input id="orderLink" placeholder="Facebook link">
+      </div>
+
+      <div class="field" id="orderTargetField">
+        <label>Target</label>
+        <input id="orderTarget" placeholder="ex: 20">
+      </div>
+
+      <div class="field" id="orderReactionField" style="display:none;">
+        <label>Reaction</label>
+        <select id="orderReaction"></select>
+      </div>
+
+      <div class="field" id="orderCommentField" style="display:none;">
+        <label>Comment text</label>
+        <input id="orderCommentText" placeholder="ex: cool">
+      </div>
+
+      <div class="row">
+        <button class="btn2" onclick="goBackDash()">Back</button>
+        <button class="btn2" onclick="createOrder()">Add</button>
+      </div>
+      <div id="orderMsg" class="message"></div>
+    </div>
+
+    <!-- Deposit -->
+    <div id="depositPage" class="page">
+      <div class="title"><h1>Deposit</h1><p>Soumettre un dépôt</p></div>
+      <div class="field">
+        <label>Coins (min 1000)</label>
+        <input id="depCoins" placeholder="1000">
+      </div>
+      <div class="field">
+        <label>Reference</label>
+        <input id="depRef" placeholder="ID transaction">
+      </div>
+      <div class="row">
+        <button class="btn2" onclick="goBackDash()">Back</button>
+        <button class="btn2" onclick="submitDeposit()">Submit</button>
+      </div>
+      <div id="depMsg" class="message"></div>
+    </div>
+
+    <!-- Withdraw -->
+    <div id="withdrawPage" class="page">
+      <div class="title"><h1>Withdraw</h1><p>Soumettre un retrait</p></div>
+      <div class="field">
+        <label>OM number (+261...)</label>
+        <input id="wdNumber" placeholder="+261...">
+      </div>
+      <div class="field">
+        <label>OM name</label>
+        <input id="wdName" placeholder="Rakoto">
+      </div>
+      <div class="field">
+        <label>Amount Ar (min 5000)</label>
+        <input id="wdAmount" placeholder="5000">
+      </div>
+      <div class="row">
+        <button class="btn2" onclick="goBackDash()">Back</button>
+        <button class="btn2" onclick="submitWithdraw()">Submit</button>
+      </div>
+      <div id="wdMsg" class="message"></div>
+    </div>
+
+    <!-- Swap -->
+    <div id="swapPage" class="page">
+      <div class="title"><h1>Swap</h1><p>1 COIN = 1.5 Ar</p></div>
+      <div class="field">
+        <label>Amount Ar</label>
+        <input id="swapAmt" placeholder="1000">
+      </div>
+      <div class="row">
+        <button class="btn2" onclick="goBackDash()">Back</button>
+        <button class="btn2" onclick="doSwap()">Swap</button>
+      </div>
+      <div id="swapMsg" class="message"></div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="adminPage" class="page">
+      <div class="title"><h1>Admin</h1><p>Gestion</p></div>
+
+      <div class="card">
+        <h2>User info</h2>
+        <div class="field"><label>Email</label><input id="adminInfoEmail"></div>
+        <button class="btn2" onclick="adminUserInfo()">Get info</button>
+        <div id="adminInfoMsg" class="message"></div>
+      </div>
+
+      <div class="card">
+        <h2>Credit</h2>
+        <div class="field"><label>Email</label><input id="adminCreditEmail"></div>
+        <div class="field"><label>Type</label>
+          <select id="adminCreditType">
+            <option value="coins">Coins</option>
+            <option value="ar">Ar</option>
+          </select>
+        </div>
+        <div class="field"><label>Amount</label><input id="adminCreditAmount"></div>
+        <button class="btn2" onclick="adminCredit()">Credit</button>
+        <div id="adminCreditMsg" class="message"></div>
+      </div>
+
+      <div class="card">
+        <h2>Pending deposits</h2>
+        <button class="btn2" onclick="adminLoadDeposits()">Refresh</button>
+        <div id="adminDeposits" class="list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Pending withdraws</h2>
+        <button class="btn2" onclick="adminLoadWithdraws()">Refresh</button>
+        <div id="adminWithdraws" class="list"></div>
+      </div>
+
+      <div class="row">
+        <button class="btn2" onclick="goBackDash()">Back</button>
+      </div>
+    </div>
+
   </div>
 
-  <script>
-    // ⚠️ REMPLACE CETTE URL PAR CELLE DE CLOUDFLARED
-    const API_URL = "https://widescreen-bonus-supervisors-solaris.trycloudflare.com";
+<script>
+  // ====== CONFIG ======
+  const API_URL = "https://valuable-additionally-proxy-musical.trycloudflare.com"; // <-- change
+  // ====================
 
-    let currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
-    let selectedAccountId = null;
-    let currentTask = null;
+  let auth = JSON.parse(localStorage.getItem("auth") || "null");
+  let me = null;
 
-    // Helpers UI
-    function setMessage(id, text, type = "") {
-      const el = document.getElementById(id);
-      el.className = "message " + type;
-      el.innerHTML = text;
-    }
+  let currentOrderType = null;
+  let currentTask = null; // {account_id, task_id, type,...}
 
-    function showLogin() {
-      document.getElementById("loginForm").classList.add("active");
-      document.getElementById("registerForm").classList.remove("active");
-      document.getElementById("loginTab").classList.add("active");
-      document.getElementById("loginTab").classList.remove("inactive");
-      document.getElementById("registerTab").classList.remove("active");
-      document.getElementById("registerTab").classList.add("inactive");
-    }
+  function setMsg(id, text, type=""){
+    const el = document.getElementById(id);
+    el.className = "message " + type;
+    el.innerHTML = text;
+  }
 
-    function showRegister() {
-      document.getElementById("registerForm").classList.add("active");
-      document.getElementById("loginForm").classList.remove("active");
-      document.getElementById("registerTab").classList.add("active");
-      document.getElementById("registerTab").classList.remove("inactive");
-      document.getElementById("loginTab").classList.remove("active");
-      document.getElementById("loginTab").classList.add("inactive");
-    }
+  function show(pageId){
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(pageId).classList.add("active");
+  }
 
-    function showAuthPage() {
-      document.getElementById("authPage").classList.add("active");
-      document.getElementById("dashboardPage").classList.remove("active");
-    }
+  function showLogin(){
+    document.getElementById("loginForm").classList.add("active");
+    document.getElementById("registerForm").classList.remove("active");
+    document.getElementById("loginTab").classList.add("active");
+    document.getElementById("loginTab").classList.remove("inactive");
+    document.getElementById("registerTab").classList.remove("active");
+    document.getElementById("registerTab").classList.add("inactive");
+  }
+  function showRegister(){
+    document.getElementById("registerForm").classList.add("active");
+    document.getElementById("loginForm").classList.remove("active");
+    document.getElementById("registerTab").classList.add("active");
+    document.getElementById("registerTab").classList.remove("inactive");
+    document.getElementById("loginTab").classList.remove("active");
+    document.getElementById("loginTab").classList.add("inactive");
+  }
 
-    function showDashboard() {
-      document.getElementById("authPage").classList.remove("active");
-      document.getElementById("dashboardPage").classList.add("active");
-      if (currentUser) {
-        document.getElementById("userEmailLabel").textContent = currentUser.email;
-      }
-      updateBalances();
-      toggleAdminUI();
-    }
+  async function api(path, method="GET", body=null){
+    const headers = {"Content-Type":"application/json"};
+    if (auth && auth.token) headers["Authorization"] = "Bearer " + auth.token;
+    const opts = {method, headers};
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(API_URL + path, opts);
+    const txt = await r.text();
+    let j = null;
+    try { j = JSON.parse(txt); } catch(e){ j = {raw: txt}; }
+    if (!r.ok) throw new Error(j.message || j.error || txt);
+    return j;
+  }
 
-    function toggleAdminUI() {
-      const menu = document.getElementById("hamburgerWrap");
-      if (currentUser && currentUser.is_admin) {
-        menu.style.display = "block";
+  function goBackDash(){
+    show("dashPage");
+    refreshMe();
+  }
+
+  async function refreshMe(){
+    try{
+      me = await api("/api/me");
+      document.getElementById("balanceBadge").textContent =
+        `Balance: ${Number(me.coins).toFixed(2)} COINS | ${parseInt(me.ar)} Ar`;
+
+      // disable get buttons if coins < 20
+      const blocked = Number(me.coins) < 20;
+      ["btnGetFollower","btnGetLike","btnGetComment"].forEach(id=>{
+        document.getElementById(id).disabled = blocked;
+      });
+      if (blocked){
+        setMsg("dashMessage","Vous devez avoir au moins 20 coins pour ouvrir Get follower/like/comment.","error");
       } else {
-        menu.style.display = "none";
-      }
-    }
-
-    function toggleAdminMenu() {
-      const m = document.getElementById("adminMenu");
-      m.classList.toggle("show");
-    }
-
-    function hideAdminMenu() {
-      document.getElementById("adminMenu").classList.remove("show");
-    }
-
-    function showSection(name) {
-      hideAdminMenu();
-      const sections = [
-        "sectionAddAccount","sectionWork","sectionGetFollower",
-        "sectionGetLike","sectionGetComment","sectionDeposit",
-        "sectionWithdraw","sectionSwap","sectionAdminCredit"
-      ];
-      sections.forEach(id => {
-        document.getElementById(id).style.display = (id === "section" + name.charAt(0).toUpperCase() + name.slice(1)) ? "block" : "none";
-      });
-      // effacer messages
-      ["addAccountMessage","gfMessage","glMessage","gcMessage","depMessage","wdMessage","swapMessage","workerMessage","admMessage","dashboardMessage"]
-        .forEach(id => setMessage(id, ""));
-      if (name === "work") {
-        loadAccountsForWork();
-      }
-    }
-
-    function showAccountInfo() {
-      hideAdminMenu();
-      if (!currentUser) return;
-      setMessage("dashboardMessage",
-        "Email: " + currentUser.email +
-        "<br>Coins: " + currentUser.balance_coins +
-        " — Ar: " + currentUser.balance_ar,
-        "success"
-      );
-    }
-
-    function showAdminCredit() {
-      showSection("adminCredit");
-    }
-
-    async function updateBalances() {
-      if (!currentUser) return;
-      try {
-        const r = await fetch(`${API_URL}/wallet/balance?user_id=${encodeURIComponent(currentUser.id)}`);
-        const data = await r.json();
-        if (r.ok) {
-          currentUser.balance_coins = data.balance_coins;
-          currentUser.balance_ar = data.balance_ar;
-          localStorage.setItem("currentUser", JSON.stringify(currentUser));
-          document.getElementById("balanceCoins").textContent = data.balance_coins.toFixed(2);
-          document.getElementById("balanceAr").textContent = Math.floor(data.balance_ar);
-          updateFeatureButtons();
-        }
-      } catch (e) {
-        console.error("Balance error:", e);
-      }
-    }
-
-    function updateFeatureButtons() {
-      const needCoins = currentUser && currentUser.balance_coins >= 20;
-      const btns = [
-        "btnAddAccount",
-        "btnGetFollower",
-        "btnGetLike",
-        "btnGetComment"
-      ];
-      btns.forEach(id => {
-        const el = document.getElementById(id);
-        if (!needCoins) {
-          el.classList.add("disabled");
-        } else {
-          el.classList.remove("disabled");
-        }
-      });
-    }
-
-    // AUTH
-    async function registerUser() {
-      const email = document.getElementById("registerEmail").value.trim();
-      const password = document.getElementById("registerPassword").value.trim();
-
-      if (!email || !password) {
-        setMessage("authMessage", "Remplis tous les champs.", "error");
-        return;
+        setMsg("dashMessage","","");
       }
 
-      try {
-        setMessage("authMessage", '<span class="loader"></span>Inscription...', "");
+      // admin
+      const isAdmin = (me.email || "").toLowerCase() === "tenshyxa@gmail.com";
+      document.getElementById("adminBtn").style.display = isAdmin ? "inline-block" : "none";
 
-        const response = await fetch(`${API_URL}/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Erreur lors de l'inscription");
-
-        currentUser = {
-          id: data.id,
-          email: data.email,
-          is_admin: data.is_admin,
-          balance_coins: data.balance_coins,
-          balance_ar: data.balance_ar
-        };
-        localStorage.setItem("currentUser", JSON.stringify(currentUser));
-        setMessage("authMessage", "Inscription réussie.", "success");
-
-        showDashboard();
-      } catch (error) {
-        setMessage("authMessage", error.message, "error");
-      }
+    }catch(e){
+      console.log(e);
     }
+  }
 
-    async function loginUser() {
-      const email = document.getElementById("loginEmail").value.trim();
-      const password = document.getElementById("loginPassword").value.trim();
+  // ===== AUTH =====
+  async function registerUser(){
+    const email = document.getElementById("registerEmail").value.trim();
+    const password = document.getElementById("registerPassword").value.trim();
+    if(!email || !password) return setMsg("authMessage","Remplis tous les champs.","error");
 
-      if (!email || !password) {
-        setMessage("authMessage", "Remplis tous les champs.", "error");
-        return;
-      }
-
-      try {
-        setMessage("authMessage", '<span class="loader"></span>Connexion...', "");
-
-        const response = await fetch(`${API_URL}/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Erreur lors de la connexion");
-
-        currentUser = {
-          id: data.id,
-          email: data.email,
-          is_admin: data.is_admin,
-          balance_coins: data.balance_coins,
-          balance_ar: data.balance_ar
-        };
-        localStorage.setItem("currentUser", JSON.stringify(currentUser));
-        setMessage("authMessage", "Connexion réussie.", "success");
-
-        showDashboard();
-      } catch (error) {
-        setMessage("authMessage", error.message, "error");
-      }
+    try{
+      setMsg("authMessage",'<span class="loader"></span>Inscription...', "");
+      const r = await api("/register","POST",{email,password});
+      // backend returns user_id or id depending on your implementation
+      // then login automatically
+      await loginUser(true);
+    }catch(e){
+      setMsg("authMessage",e.message,"error");
     }
+  }
 
-    function logoutUser() {
-      currentUser = null;
-      localStorage.removeItem("currentUser");
-      document.getElementById("loginEmail").value = "";
-      document.getElementById("loginPassword").value = "";
-      document.getElementById("registerEmail").value = "";
-      document.getElementById("registerPassword").value = "";
-      setMessage("authMessage", "", "");
-      showAuthPage();
-      showLogin();
+  async function loginUser(silent=false){
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
+    if(!email || !password) return setMsg("authMessage","Remplis tous les champs.","error");
+
+    try{
+      setMsg("authMessage",'<span class="loader"></span>Connexion...', "");
+      const r = await api("/login","POST",{email,password});
+      auth = {token: r.token};
+      localStorage.setItem("auth", JSON.stringify(auth));
+      show("dashPage");
+      await refreshMe();
+      if(!silent) setMsg("authMessage","Connexion réussie.","success");
+    }catch(e){
+      setMsg("authMessage",e.message,"error");
     }
+  }
 
-    // ADD ACCOUNT
-    async function addTaskAccount() {
-      if (!currentUser) return;
-      if (currentUser.balance_coins < 20) {
-        setMessage("addAccountMessage", "Minimum 20 Coins requis.", "error");
-        return;
-      }
-      const profile_link = document.getElementById("accProfileLink").value.trim();
-      const cookies_string = document.getElementById("accCookies").value.trim();
-      if (!profile_link || !cookies_string) {
-        setMessage("addAccountMessage", "Remplis tous les champs.", "error");
-        return;
-      }
-      try {
-        setMessage("addAccountMessage", '<span class="loader"></span>Vérification compte...', "");
+  function logoutUser(){
+    auth=null; me=null; currentTask=null;
+    localStorage.removeItem("auth");
+    show("authPage");
+    showLogin();
+    setMsg("authMessage","", "");
+  }
 
-        const r = await fetch(`${API_URL}/task_account/add`, {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({
-            user_id: currentUser.id,
-            profile_link,
-            cookies_string
-          })
-        });
-        const data = await r.json();
-        if (!r.ok) throw new Error(data.message || "Erreur Add account");
+  // ===== Add account =====
+  function openAddAccount(){
+    show("addAccountPage");
+    setMsg("addAccMsg","","");
+  }
 
-        setMessage("addAccountMessage", data.message, "success");
-        await updateBalances();
-      } catch (e) {
-        setMessage("addAccountMessage", e.message, "error");
-      }
+  async function checkAccount(){
+    const profile_url = document.getElementById("accProfileUrl").value.trim();
+    const cookies = document.getElementById("accCookies").value.trim();
+    if(!profile_url || !cookies) return setMsg("addAccMsg","Remplis URL + cookies.","error");
+    try{
+      setMsg("addAccMsg",'<span class="loader"></span>Checking...', "");
+      const r = await api("/api/account/check","POST",{profile_url,cookies});
+      setMsg("addAccMsg",`✅ Added: ${r.name}`,"success");
+      await refreshMe();
+    }catch(e){
+      setMsg("addAccMsg",e.message,"error");
     }
+  }
 
-    // WORK TASKS
-    async function loadAccountsForWork() {
-      if (!currentUser) return;
-      const area = document.getElementById("accountsForWork");
-      area.innerHTML = "Chargement...";
-      selectedAccountId = null;
-      currentTask = null;
-      document.getElementById("currentTaskArea").style.display = "none";
-      try {
-        const r = await fetch(`${API_URL}/task_account/list?user_id=${encodeURIComponent(currentUser.id)}`);
-        const data = await r.json();
-        if (!r.ok) throw new Error(data.message || "Erreur chargement comptes");
-        const accounts = data.accounts || [];
-        if (!accounts.length) {
-          area.innerHTML = "<div>Aucun compte TASK, ajoutez-en un d'abord.</div>";
-          return;
-        }
-        area.innerHTML = accounts.map(a => `
-          <div class="account-item">
-            <div>
-              <strong>${a.display_name || a.profile_link}</strong><br>
-              <span style="font-size:12px;opacity:0.8;">${a.profile_link}</span>
-            </div>
-            <button class="small-btn" onclick="selectAccountForWork('${a.id}')">Utiliser</button>
+  // ===== Accounts list =====
+  async function openTask(){
+    show("taskAccountsPage");
+    await loadAccounts();
+  }
+
+  async function loadAccounts(){
+    try{
+      setMsg("taskAccMsg",'<span class="loader"></span>Loading...', "");
+      const r = await api("/api/accounts");
+      const items = r.items || [];
+      const list = document.getElementById("accountsList");
+      if(items.length===0){
+        list.innerHTML = `<div class="item">No account. Add account first.</div>`;
+      } else {
+        list.innerHTML = items.map(a=>`
+          <div class="item">
+            <b>${a.display_name || a.profile_link}</b>
+            <div class="small">${a.profile_link}</div>
+            <button class="btn2" style="margin-top:10px;" onclick="loadNextTask(${a.id})">Use this account</button>
           </div>
         `).join("");
-      } catch (e) {
-        area.innerHTML = `Erreur: ${e.message}`;
       }
+      setMsg("taskAccMsg","", "");
+    }catch(e){
+      setMsg("taskAccMsg",e.message,"error");
     }
+  }
 
-    async function selectAccountForWork(accId) {
-      selectedAccountId = accId;
-      document.getElementById("currentTaskArea").style.display = "block";
-      setMessage("workerMessage", "Chargement tâche...", "");
-      await loadNextTask();
-    }
-
-    async function loadNextTask() {
-      if (!currentUser || !selectedAccountId) return;
-      try {
-        const url = `${API_URL}/worker/next_task?user_id=${encodeURIComponent(currentUser.id)}&account_id=${encodeURIComponent(selectedAccountId)}`;
-        const r = await fetch(url);
-        const data = await r.json();
-        if (!r.ok || !data.task_id) {
-          currentTask = null;
-          setMessage("workerMessage", data.message || "Aucune tâche disponible.", data.task_id ? "" : "error");
-          document.getElementById("currentTaskInfo").innerHTML = data.message || "Aucune tâche.";
-          return;
-        }
-        currentTask = data;
-        const info = `
-          <div><strong>Type:</strong> ${data.task_type.toUpperCase()}</div>
-          <div style="word-break:break-all;"><strong>Lien:</strong> ${data.link}</div>
-          ${data.task_type === "like" && data.reaction_key ? `<div><strong>Réaction:</strong> ${data.reaction_key}</div>` : ""}
-          ${data.task_type === "comment" && data.comment_text ? `<div><strong>Comment:</strong> ${data.comment_text}</div>` : ""}
-          <div><strong>Progress:</strong> ${data.success_count}/${data.target || "-"} </div>
-        `;
-        document.getElementById("currentTaskInfo").innerHTML = info;
-        setMessage("workerMessage", "", "");
-      } catch (e) {
-        setMessage("workerMessage", e.message, "error");
-      }
-    }
-
-    async function verifyCurrentTask() {
-      if (!currentUser || !selectedAccountId || !currentTask) return;
-      setMessage("workerMessage", '<span class="loader"></span>Vérification...', "");
-      try {
-        const r = await fetch(`${API_URL}/worker/verify_task`, {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({
-            user_id: currentUser.id,
-            account_id: selectedAccountId,
-            task_id: currentTask.task_id
-          })
-        });
-        const data = await r.json();
-        if (!r.ok) throw new Error(data.message || "Erreur vérification");
-        setMessage("workerMessage", data.message || "Fini.", data.success ? "success" : "error");
-        await updateBalances();
-        await loadNextTask();
-      } catch(e) {
-        setMessage("workerMessage", e.message, "error");
-      }
-    }
-
-    async function skipTask() {
-      setMessage("workerMessage", "Tâche ignorée, suivante...", "");
-      await loadNextTask();
-    }
-
-    // ORDERS
-    async function createFollowOrder() {
-      if (!currentUser) return;
-      const link = document.getElementById("gfProfileLink").value.trim();
-      const target = parseInt(document.getElementById("gfTarget").value || "0", 10);
-      if (!link || !target) {
-        setMessage("gfMessage","Remplis tous les champs.","error");
+  // ===== Task run =====
+  async function loadNextTask(account_id){
+    try{
+      setMsg("taskAccMsg",'<span class="loader"></span>Loading task...', "");
+      const r = await api(`/api/tasks/next?account_id=${account_id}`);
+      if(!r.task){
+        setMsg("taskAccMsg","No tasks available.","error");
         return;
       }
-      try {
-        setMessage("gfMessage", '<span class="loader"></span>Création...', "");
-        const r = await fetch(`${API_URL}/tasks/create_follow`, {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({ user_id: currentUser.id, profile_link: link, target })
-        });
-        const data = await r.json();
-        if(!r.ok) throw new Error(data.message||"Erreur FOLLOW");
-        setMessage("gfMessage", data.message, "success");
-        await updateBalances();
-      } catch(e) {
-        setMessage("gfMessage", e.message,"error");
-      }
+      currentTask = r.task;
+      show("taskRunPage");
+      renderTask(currentTask);
+    }catch(e){
+      setMsg("taskAccMsg",e.message,"error");
     }
+  }
 
-    async function createLikeOrder() {
-      if (!currentUser) return;
-      const link = document.getElementById("glLink").value.trim();
-      const reaction_key = document.getElementById("glReaction").value;
-      const target = parseInt(document.getElementById("glTarget").value || "0", 10);
-      if (!link || !reaction_key || !target) {
-        setMessage("glMessage","Remplis tous les champs.","error");
-        return;
-      }
-      try {
-        setMessage("glMessage", '<span class="loader"></span>Création...', "");
-        const r = await fetch(`${API_URL}/tasks/create_like`, {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({ user_id: currentUser.id, link, reaction_key, target })
-        });
-        const data = await r.json();
-        if(!r.ok) throw new Error(data.message||"Erreur LIKE");
-        setMessage("glMessage", data.message, "success");
-        await updateBalances();
-      } catch(e) {
-        setMessage("glMessage", e.message,"error");
-      }
+  function renderTask(t){
+    document.getElementById("taskTypeTitle").textContent = "Task " + (t.task_type || "").toUpperCase();
+    document.getElementById("taskAccountTitle").textContent = "Account: " + (t.account_name || "");
+    const a = document.getElementById("taskLink");
+    a.href = t.link;
+    a.textContent = "Open link";
+
+    let extra = "";
+    if(t.task_type === "like"){
+      extra = `<div><b>Reaction:</b> ${t.reaction_label || t.reaction_key}</div>`;
+    } else if(t.task_type === "comment"){
+      extra = `<div><b>Comment text:</b> ${t.comment_text || ""}</div>`;
     }
+    document.getElementById("taskExtra").innerHTML = extra;
+    setMsg("taskRunMsg","", "");
+  }
 
-    async function createCommentOrder() {
-      if (!currentUser) return;
-      const link = document.getElementById("gcLink").value.trim();
-      const comment_text = document.getElementById("gcText").value.trim();
-      const target = parseInt(document.getElementById("gcTarget").value || "0", 10);
-      if (!link || !comment_text || !target) {
-        setMessage("gcMessage","Remplis tous les champs.","error");
-        return;
-      }
-      try {
-        setMessage("gcMessage", '<span class="loader"></span>Création...', "");
-        const r = await fetch(`${API_URL}/tasks/create_comment`, {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({ user_id: currentUser.id, link, comment_text, target })
-        });
-        const data = await r.json();
-        if(!r.ok) throw new Error(data.message||"Erreur COMMENT");
-        setMessage("gcMessage", data.message, "success");
-        await updateBalances();
-      } catch(e) {
-        setMessage("gcMessage", e.message,"error");
-      }
-    }
-
-    // DEPOSIT
-    async function createDeposit() {
-      if (!currentUser) return;
-      const coins = parseFloat(document.getElementById("depCoins").value || "0");
-      const reference = document.getElementById("depRef").value.trim();
-      if (!coins || coins <= 0) {
-        setMessage("depMessage", "Montant coins invalide.", "error");
-        return;
-      }
-      try {
-        setMessage("depMessage", '<span class="loader"></span>Envoi demande...', "");
-        const r = await fetch(`${API_URL}/wallet/deposit`, {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({user_id: currentUser.id, coins, reference})
-        });
-        const data = await r.json();
-        if (!r.ok) throw new Error(data.message || "Erreur dépôt");
-        setMessage("depMessage", data.message + ` (Montant: ${data.amount_ar} Ar)`, "success");
-      } catch(e) {
-        setMessage("depMessage", e.message, "error");
-      }
-    }
-
-    // WITHDRAW
-    async function createWithdraw() {
-      if (!currentUser) return;
-      const amount_ar = parseFloat(document.getElementById("wdAmount").value || "0");
-      const method = document.getElementById("wdMethod").value;
-      const account = document.getElementById("wdAccount").value.trim();
-      const name = document.getElementById("wdName").value.trim();
-      if (!amount_ar || amount_ar<=0 || !method || !account || !name) {
-        setMessage("wdMessage","Remplis tous les champs.","error");
-        return;
-      }
-      try {
-        setMessage("wdMessage", '<span class="loader"></span>Envoi demande...', "");
-        const r = await fetch(`${API_URL}/wallet/withdraw`, {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({user_id: currentUser.id, amount_ar, method, account, recipient_name:name})
-        });
-        const data = await r.json();
-        if (!r.ok) throw new Error(data.message || "Erreur withdraw");
-        setMessage("wdMessage", data.message, "success");
-        await updateBalances();
-      } catch(e) {
-        setMessage("wdMessage", e.message,"error");
-      }
-    }
-
-    // SWAP
-    async function doSwap() {
-      if (!currentUser) return;
-      const amount_ar = parseFloat(document.getElementById("swapAmount").value || "0");
-      if (!amount_ar || amount_ar<=0) {
-        setMessage("swapMessage","Montant invalide.","error");
-        return;
-      }
-      try {
-        setMessage("swapMessage", '<span class="loader"></span>SWAP...', "");
-        const r = await fetch(`${API_URL}/wallet/swap`, {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({user_id: currentUser.id, amount_ar})
-        });
-        const data = await r.json();
-        if(!r.ok) throw new Error(data.message||"Erreur swap");
-        setMessage("swapMessage", data.message, "success");
-        await updateBalances();
-      } catch(e) {
-        setMessage("swapMessage", e.message,"error");
-      }
-    }
-
-    // ADMIN CREDIT
-    async function adminCredit() {
-      if (!currentUser || !currentUser.is_admin) {
-        setMessage("admMessage","Accès admin requis.","error");
-        return;
-      }
-      const email = document.getElementById("admEmail").value.trim().toLowerCase();
-      const coins = parseFloat(document.getElementById("admCoins").value || "0");
-      const ar = parseFloat(document.getElementById("admAr").value || "0");
-      if (!email) {
-        setMessage("admMessage","Email obligatoire.","error");
-        return;
-      }
-      try {
-        setMessage("admMessage", '<span class="loader"></span>Crédit...', "");
-        const r = await fetch(`${API_URL}/admin/credit`, {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({admin_id: currentUser.id, email, coins, ar})
-        });
-        const data = await r.json();
-        if(!r.ok) throw new Error(data.message||"Erreur crédit");
-        setMessage("admMessage", data.message, "success");
-      } catch(e) {
-        setMessage("admMessage", e.message,"error");
-      }
-    }
-
-    // INIT
-    window.addEventListener("load", async () => {
-      if (currentUser) {
-        showDashboard();
+  async function verifyTask(){
+    if(!currentTask) return;
+    try{
+      setMsg("taskRunMsg",'<span class="loader"></span>Verifying...', "");
+      const r = await api("/api/tasks/verify","POST",{task_id: currentTask.id, account_id: currentTask.account_id});
+      if(r.ok){
+        setMsg("taskRunMsg",`✅ Success +${r.reward_ar}Ar`,"success");
+        await refreshMe();
+        // auto load next task for same account
+        await loadNextTask(currentTask.account_id);
       } else {
-        showAuthPage();
-        showLogin();
+        setMsg("taskRunMsg","❌ Failed","error");
+        await loadNextTask(currentTask.account_id);
       }
+    }catch(e){
+      setMsg("taskRunMsg",e.message,"error");
+    }
+  }
+
+  async function skipTask(){
+    if(!currentTask) return;
+    try{
+      await api("/api/tasks/skip","POST",{task_id: currentTask.id, account_id: currentTask.account_id});
+      await loadNextTask(currentTask.account_id);
+    }catch(e){
+      setMsg("taskRunMsg",e.message,"error");
+    }
+  }
+
+  // ===== Orders =====
+  function openOrder(type){
+    currentOrderType = type;
+    show("orderPage");
+    setMsg("orderMsg","","");
+    document.getElementById("orderLink").value = "";
+    document.getElementById("orderTarget").value = "";
+    document.getElementById("orderCommentText").value = "";
+
+    document.getElementById("orderReactionField").style.display = (type==="like") ? "block" : "none";
+    document.getElementById("orderTargetField").style.display = (type==="comment") ? "none" : "block";
+    document.getElementById("orderCommentField").style.display = (type==="comment") ? "block" : "none";
+
+    if(type==="follow") document.getElementById("orderTitle").textContent = "Get follower";
+    if(type==="like") document.getElementById("orderTitle").textContent = "Get like";
+    if(type==="comment") document.getElementById("orderTitle").textContent = "Get comment";
+
+    // fill reactions
+    const sel = document.getElementById("orderReaction");
+    sel.innerHTML = "";
+    ["like","love","haha","wow","care","angry","sad"].forEach(k=>{
+      const opt = document.createElement("option");
+      opt.value = k; opt.textContent = k;
+      sel.appendChild(opt);
     });
-  </script>
+  }
+
+  async function createOrder(){
+    const link = document.getElementById("orderLink").value.trim();
+    if(!link) return setMsg("orderMsg","Link required","error");
+
+    try{
+      setMsg("orderMsg",'<span class="loader"></span>Creating...', "");
+      if(currentOrderType==="follow"){
+        const target = document.getElementById("orderTarget").value.trim();
+        const r = await api("/api/orders/follow","POST",{link,target});
+        setMsg("orderMsg","✅ Created","success");
+      } else if(currentOrderType==="like"){
+        const target = document.getElementById("orderTarget").value.trim();
+        const reaction = document.getElementById("orderReaction").value;
+        const r = await api("/api/orders/like","POST",{link,target,reaction});
+        setMsg("orderMsg","✅ Created","success");
+      } else {
+        const text = document.getElementById("orderCommentText").value.trim();
+        const r = await api("/api/orders/comment","POST",{link,text});
+        setMsg("orderMsg","✅ Created","success");
+      }
+      await refreshMe();
+    }catch(e){
+      setMsg("orderMsg",e.message,"error");
+    }
+  }
+
+  // ===== Deposit/Withdraw/Swap =====
+  function openDeposit(){ show("depositPage"); setMsg("depMsg","",""); }
+  function openWithdraw(){ show("withdrawPage"); setMsg("wdMsg","",""); }
+  function openSwap(){ show("swapPage"); setMsg("swapMsg","",""); }
+
+  async function submitDeposit(){
+    const coins = document.getElementById("depCoins").value.trim();
+    const reference = document.getElementById("depRef").value.trim();
+    try{
+      setMsg("depMsg",'<span class="loader"></span>Submitting...', "");
+      const r = await api("/api/deposit","POST",{coins,reference});
+      setMsg("depMsg",`✅ Submitted ID: ${r.id}`,"success");
+    }catch(e){
+      setMsg("depMsg",e.message,"error");
+    }
+  }
+
+  async function submitWithdraw(){
+    const om_number = document.getElementById("wdNumber").value.trim();
+    const om_name = document.getElementById("wdName").value.trim();
+    const amount_ar = document.getElementById("wdAmount").value.trim();
+    try{
+      setMsg("wdMsg",'<span class="loader"></span>Submitting...', "");
+      const r = await api("/api/withdraw","POST",{om_number,om_name,amount_ar});
+      setMsg("wdMsg",`✅ Submitted ID: ${r.id}`,"success");
+      await refreshMe();
+    }catch(e){
+      setMsg("wdMsg",e.message,"error");
+    }
+  }
+
+  async function doSwap(){
+    const amount_ar = document.getElementById("swapAmt").value.trim();
+    try{
+      setMsg("swapMsg",'<span class="loader"></span>Swapping...', "");
+      const r = await api("/api/swap","POST",{amount_ar});
+      setMsg("swapMsg",`✅ Swapped -> +${Number(r.coins_added).toFixed(2)} coins`,"success");
+      await refreshMe();
+    }catch(e){
+      setMsg("swapMsg",e.message,"error");
+    }
+  }
+
+  // ===== Admin =====
+  function openAdmin(){
+    show("adminPage");
+    adminLoadDeposits();
+    adminLoadWithdraws();
+  }
+
+  async function adminUserInfo(){
+    const email = document.getElementById("adminInfoEmail").value.trim();
+    try{
+      setMsg("adminInfoMsg",'<span class="loader"></span>Loading...', "");
+      const r = await api(`/api/admin/user?email=${encodeURIComponent(email)}`);
+      setMsg("adminInfoMsg", `Coins: ${r.user.coins} | Ar: ${r.user.ar}`, "success");
+    }catch(e){
+      setMsg("adminInfoMsg", e.message, "error");
+    }
+  }
+
+  async function adminCredit(){
+    const email = document.getElementById("adminCreditEmail").value.trim();
+    const type = document.getElementById("adminCreditType").value;
+    const amount = document.getElementById("adminCreditAmount").value.trim();
+    try{
+      setMsg("adminCreditMsg",'<span class="loader"></span>Crediting...', "");
+      const r = await api(type==="ar" ? "/api/admin/credit_ar" : "/api/admin/credit_coins","POST",{email,amount});
+      setMsg("adminCreditMsg","✅ OK","success");
+    }catch(e){
+      setMsg("adminCreditMsg", e.message, "error");
+    }
+  }
+
+  async function adminLoadDeposits(){
+    try{
+      const r = await api("/api/admin/pending_deposits");
+      const items = r.items || [];
+      const el = document.getElementById("adminDeposits");
+      if(items.length===0){ el.innerHTML = `<div class="item">Empty</div>`; return; }
+      el.innerHTML = items.map(d=>`
+        <div class="item">
+          <b>ID:</b> ${d.id}<br>
+          <span class="small">user: ${d.user_email} | coins: ${d.coins} | ref: ${d.reference}</span><br><br>
+          <button class="btn2" onclick="adminApproveDeposit('${d.id}')">Approve</button>
+          <button class="btn2" onclick="adminRejectDeposit('${d.id}')">Reject</button>
+        </div>
+      `).join("");
+    }catch(e){
+      document.getElementById("adminDeposits").innerHTML = `<div class="item">Error: ${e.message}</div>`;
+    }
+  }
+
+  async function adminApproveDeposit(id){
+    await api("/api/admin/deposit/approve","POST",{id});
+    await adminLoadDeposits();
+    await refreshMe();
+  }
+  async function adminRejectDeposit(id){
+    await api("/api/admin/deposit/reject","POST",{id});
+    await adminLoadDeposits();
+  }
+
+  async function adminLoadWithdraws(){
+    try{
+      const r = await api("/api/admin/pending_withdraws");
+      const items = r.items || [];
+      const el = document.getElementById("adminWithdraws");
+      if(items.length===0){ el.innerHTML = `<div class="item">Empty</div>`; return; }
+      el.innerHTML = items.map(d=>`
+        <div class="item">
+          <b>ID:</b> ${d.id}<br>
+          <span class="small">user: ${d.user_email} | amount: ${d.amount_ar} | om: ${d.om_number}</span><br><br>
+          <button class="btn2" onclick="adminApproveWithdraw('${d.id}')">Approve</button>
+          <button class="btn2" onclick="adminRejectWithdraw('${d.id}')">Reject+Refund</button>
+        </div>
+      `).join("");
+    }catch(e){
+      document.getElementById("adminWithdraws").innerHTML = `<div class="item">Error: ${e.message}</div>`;
+    }
+  }
+
+  async function adminApproveWithdraw(id){
+    await api("/api/admin/withdraw/approve","POST",{id});
+    await adminLoadWithdraws();
+  }
+  async function adminRejectWithdraw(id){
+    await api("/api/admin/withdraw/reject","POST",{id});
+    await adminLoadWithdraws();
+  }
+
+  // ===== init =====
+  window.addEventListener("load", async ()=>{
+    if(auth && auth.token){
+      show("dashPage");
+      await refreshMe();
+    } else {
+      show("authPage");
+      showLogin();
+    }
+  });
+</script>
 </body>
 </html>
